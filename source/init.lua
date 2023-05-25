@@ -20,27 +20,29 @@ _image_player_jump = gfx.image.new("images/jump")
 _image_player_die = gfx.image.new("images/die")
 
 _image_box = gfx.image.new("images/box")
-_image_snake = gfx.imagetable.new("images/snake")
+_image_enemy_small = gfx.imagetable.new("images/enemy_small")
+_image_enemy_large = gfx.imagetable.new("images/enemy_large")
+_image_enemy_flying = gfx.imagetable.new("images/enemy_flying")
 
 _image_pistol = gfx.image.new("images/pistol")
 _image_shotgun = gfx.image.new("images/shotgun")
 _image_rifle = gfx.image.new("images/rifle")
+
+-- fonts
+small_font = gfx.font.new("fonts/BitPotion")
 
 -- rooms
 import "rooms/gameRoom"
 
 -- actors
 import "actors/box"
-import "actors/snake"
+import "actors/enemy"
 import "actors/weapon"
 import "actors/bullet"
 
 -- player
 import "player/player"
 import "player/deadState"
-
--- particles
-import "particles"
 
 -- globals
 gravity = 10 * deltaTime
@@ -51,7 +53,8 @@ ZIndex = enum({
   "enemy",
 	"boxes",
   "player",
-  "weapon"
+  "weapon",
+	"ui"
 })
 
 Group = enum({

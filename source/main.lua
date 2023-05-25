@@ -4,6 +4,7 @@ local pd <const> = playdate
 local gfx <const> = pd.graphics
 
 local function init()
+	gfx.sprite.setAlwaysRedraw(true)
 	manager = Manager()
 	manager:resetAndEnter(GameRoom())
 end
@@ -15,7 +16,7 @@ local function updateGame()
 end
 
 init()
-pd.setMinimumGCTime(2)
+--pd.setMinimumGCTime(2)
 
 function playdate.update()
 	updateGame()

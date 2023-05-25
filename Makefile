@@ -9,7 +9,6 @@ SOURCE := ./source
 all: build run
 
 build:
-	dir "$(DIR)" || mkdir "$(DIR)"
 	$(PYTHON) ./inc_build.py
 	pdc $(SOURCE) $(DEST)
 
