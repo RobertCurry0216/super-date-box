@@ -1,5 +1,5 @@
 local gfx <const> = playdate.graphics
-local speed <const> = 40 * deltaTime
+local speed <const> = 45 * deltaTime
 local angrySpeed <const> = 1.5
 
 local function throwBody(x, y, image)
@@ -115,12 +115,17 @@ end
 
 class("EnemyLarge").extends(Enemy)
 
-local speed_large <const> = 20 * deltaTime
+local speed_large <const> = 35 * deltaTime
 
 function EnemyLarge:init(x, y)
   EnemyLarge.super.init(self, _image_enemy_large, x, y)
   self.speed = speed_large
   self.health = 30
+
+  if math.random() > 0.5 then
+    self.speed *= -1
+    self.img_flip = gfx.kImageUnflipped
+  end
 end
 
 class("EnemyFlying").extends(Enemy)

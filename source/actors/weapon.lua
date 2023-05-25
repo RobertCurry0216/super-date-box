@@ -61,6 +61,7 @@ local m_bullet_img <const> = gfx.image.new(m_size, m_size)
 local m_speed <const> = 180 * deltaTime
 local m_damage <const> = 5
 local m_knockback <const> = -150
+local m_rate <const> = 450
 
 gfx.pushContext(m_bullet_img)
   gfx.setColor(gfx.kColorWhite)
@@ -69,10 +70,13 @@ gfx.popContext()
 
 function Magnum:init(actor)
   Magnum.super.init(self, actor, _image_pistol)
+  self.last = 0
 end
 
 function Magnum:fire(facing)
-  if pd.buttonJustPressed("b") then
+  local time = pd.getCurrentTimeMilliseconds()
+  if pd.buttonJustPressed("b") and time - self.last >= m_rate then
+    self.last = time
     local actor = self.actor
     Bullet(m_bullet_img, m_damage, actor.x + bullet_offset*facing, actor.y, m_speed*facing, 0)
     Signal:dispatch("player_knockback", facing*m_knockback)

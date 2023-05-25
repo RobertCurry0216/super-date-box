@@ -11,6 +11,7 @@ class("GameRoom").extends(Room)
 
 local spawn_x <const> = 200
 local spawn_y <const> = -10
+local spawn_decay <const> = 80
 
 local score_x <const> = 200
 local score_y <const> = 30
@@ -97,7 +98,7 @@ end
 
 function GameRoom:spawn()
   _G["Enemy"..self.pool[math.random(1, #self.pool)]](spawn_x, spawn_y, self.player)
-  self.timer.duration = math.max(self.timer.duration-50, 1500)
+  self.timer.duration = math.max(self.timer.duration-spawn_decay, 1200)
 end
 
 function GameRoom:spawnBox()

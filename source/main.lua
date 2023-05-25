@@ -25,9 +25,7 @@ local function updateGame()
 end
 
 init()
---pd.setMinimumGCTime(2)
 
 function playdate.update()
 	updateGame()
-	pd.drawFPS(2,0) -- FPS widget
 end
