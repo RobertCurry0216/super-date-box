@@ -32,7 +32,10 @@ _image_rifle = gfx.image.new("images/rifle")
 small_font = gfx.font.new("fonts/BitPotion")
 
 -- rooms
+import "rooms/splashRoom"
 import "rooms/gameRoom"
+import "rooms/highscoreRoom"
+import "rooms/gameOverRoom"
 
 -- actors
 import "actors/box"

@@ -4,7 +4,7 @@ local gfx <const> = playdate.graphics
 local listen_to <const> = {
   "box_picked_up",
   "enemy_angry",
-  "restart_level"
+  "game_over"
 }
 
 class("GameRoom").extends(Room)
@@ -126,6 +126,6 @@ function GameRoom:on_enemy_angry(_, enemy)
   enemy:getAngry(spawn_x, spawn_y)
 end
 
-function GameRoom:on_restart_level()
-  manager:resetAndEnter(GameRoom())
+function GameRoom:on_game_over()
+  manager:enter(GameOverRoom(), self.score)
 end

@@ -8,11 +8,8 @@ function DeadState:onenter(...)
   DeadState.super.onenter(self, ...)
   self.actor.dx = 0
   self.actor.dy = 0
+  playdate.timer.performAfterDelay(2000, function()
+    Signal:dispatch("game_over")
+  end)
 end
 
-function DeadState:update()
-  DeadState.super.update(self)
-  if playdate.buttonJustPressed(playdate.kButtonB) then
-    Signal:dispatch("restart_level")
-  end
-end
