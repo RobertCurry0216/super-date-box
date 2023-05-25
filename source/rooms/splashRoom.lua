@@ -4,6 +4,8 @@ local img <const> = gfx.image.new(400, 240, gfx.kColorBlack)
 local bold_font <const> = gfx.getFont(gfx.font.kVariantBold)
 local bold_spacing <const> = bold_font:getHeight() + 3
 local small_spacing <const> = small_font:getHeight() + 3
+
+-- Draw the splash screen image
 gfx.pushContext(img)
   gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
   bold_font:drawTextAligned("SUPER", 200, 50, kTextAlignment.center)
@@ -19,6 +21,8 @@ class("SplashRoom").extends(Room)
 
 function SplashRoom:init()
   SplashRoom.super.init(self)
+
+  -- create the splach screen sprite
   local spr = gfx.sprite.new(img)
   spr:setIgnoresDrawOffset(true)
   spr:setUpdatesEnabled(false)
@@ -29,9 +33,9 @@ function SplashRoom:init()
 end
 
 function SplashRoom:update()
-  if playdate.buttonJustPressed("a") then
+  if playdate.buttonJustReleased("a") then
     manager:push(GameRoom())
-  elseif playdate.buttonJustPressed("b") then
+  elseif playdate.buttonJustReleased("b") then
     manager:push(HighscoreRoom())
   end
 end

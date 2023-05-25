@@ -1,8 +1,8 @@
 local gfx <const> = playdate.graphics
 
 local bold_font <const> = gfx.getFont(gfx.font.kVariantBold)
-local bold_spacing <const> = bold_font:getHeight() + 3
-local small_spacing <const> = small_font:getHeight() + 3
+local bold_size <const> = bold_font:getHeight()
+local small_size <const> = small_font:getHeight()
 
 class("GameOverRoom").extends(PauseRoom)
 
@@ -17,9 +17,9 @@ end
 function GameOverRoom:update()
   local time = playdate.getCurrentTimeMilliseconds()
   if time - self._enter < 500 then return end
-  if playdate.buttonJustPressed("a") then
+  if playdate.buttonJustReleased("a") then
     manager:enter(GameRoom())
-  elseif playdate.buttonJustPressed("b") then
+  elseif playdate.buttonJustReleased("b") then
     manager:pop()
   end
 end
@@ -37,22 +37,38 @@ function GameOverRoom:updateHighScores(score, data)
 end
 
 function GameOverRoom:createSprite(pos, score)
-  local img <const> = gfx.image.new(400, 240, gfx.kColorBlack)
+  local img <const> = gfx.image.new(400, 240)
   local heading = "YOU DIED"
   if pos then
-    heading = "HIGH SCORE"
+    heading = "#"..tostring(pos).." HIGH SCORE"
   end
 
   gfx.pushContext(img)
-    gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-    bold_font:drawTextAligned(heading, 200, 30, kTextAlignment.center)
-    local prefix = pos and tostring(pos)..". " or " . "
-    local score = tostring(score)
-    small_font:drawTextAligned(prefix..score, 200, 60, kTextAlignment.center)
+  gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+    -- heading
+    local w = bold_font:getTextWidth(heading)+20
+    gfx.setColor(gfx.kColorBlack)
+    gfx.fillRoundRect(200-w/2, 58, w, bold_size, 2)
+    bold_font:drawTextAligned(heading, 200, 60, kTextAlignment.center)
 
-    small_font:drawTextAligned("A - PLAY AGAIN", 200, 160, kTextAlignment.center)
-    small_font:drawTextAligned("B - EXIT", 200, 160+small_spacing, kTextAlignment.center)
-    gfx.setImageDrawMode(gfx.kDrawModeCopy)
+    --subheading
+    local subheading = tostring(score).."  CRATE"..(score == 1 and "" or "S")
+    w = bold_font:getTextWidth(subheading)+20
+    gfx.fillRoundRect(200-w/2, 88, w, bold_size, 2)
+    bold_font:drawTextAligned(subheading, 200, 90, kTextAlignment.center)
+
+    -- lower text
+    local text_a = "A - PLAY AGAIN"
+    w = small_font:getTextWidth(text_a)+20
+    gfx.fillRoundRect(200-w/2, 120, w, small_size, 2)
+    small_font:drawTextAligned(text_a, 200, 120, kTextAlignment.center)
+
+    local text_b = "B - EXIT"
+    w = small_font:getTextWidth(text_b)+20
+    gfx.fillRoundRect(200-w/2, 140, w, small_size, 2)
+    small_font:drawTextAligned(text_b, 200, 140, kTextAlignment.center)
+
+  gfx.setImageDrawMode(gfx.kDrawModeCopy)
   gfx.popContext()
 
 

@@ -35,10 +35,10 @@ local _images <const> = {
 }
 
 local weapons <const> = {
-  Pistol,
-  Magnum,
-  Shotgun,
-  MachingGun
+  "Pistol",
+  "Magnum",
+  "Shotgun",
+  "MachingGun"
 }
 
 function Player:init(x, y)
@@ -94,7 +94,11 @@ function Player:on_player_knockback(_, force)
 end
 
 function Player:on_box_picked_up()
+  local next = self.weapon.className
+  while next == self.weapon.className do
+    next = weapons[math.random(1, #weapons)]
+  end
   self.weapon:remove()
-  self.weapon = weapons[math.random(1, #weapons)](self)
-  toast(self.x, self.y-20, string.upper(self.weapon.className))
+  self.weapon = _G[next](self)
+  toast(self.x, self.y-20, string.upper(next))
 end

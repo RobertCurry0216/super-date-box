@@ -13,7 +13,7 @@ function HighscoreRoom:enter()
 end
 
 function HighscoreRoom:update()
-  if playdate.buttonJustPressed("b") then
+  if playdate.buttonJustReleased("b") then
     manager:pop()
   end
 end

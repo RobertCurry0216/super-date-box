@@ -34,7 +34,7 @@ class("Pistol").extends(Weapon)
 
 local p_size <const> = 5
 local p_bullet_img <const> = gfx.image.new(p_size, p_size)
-local p_speed <const> = 180 * deltaTime
+local p_speed <const> = 200 * deltaTime
 local p_damage <const> = 2
 
 gfx.pushContext(p_bullet_img)
@@ -58,10 +58,10 @@ class("Magnum").extends(Weapon)
 
 local m_size <const> = 8
 local m_bullet_img <const> = gfx.image.new(m_size, m_size)
-local m_speed <const> = 180 * deltaTime
+local m_speed <const> = 160 * deltaTime
 local m_damage <const> = 5
 local m_knockback <const> = -150
-local m_rate <const> = 450
+local m_rate <const> = 500
 
 gfx.pushContext(m_bullet_img)
   gfx.setColor(gfx.kColorWhite)
@@ -91,7 +91,7 @@ local sg_bullet_img <const> = gfx.image.new(sg_size, sg_size)
 local sg_speed <const> = 350 * deltaTime
 local sg_damage <const> = 2
 local sg_spread <const> = math.rad(16)
-local sg_rate <const> = 600
+local sg_rate <const> = 700
 local sg_knockback <const> = -200
 
 gfx.pushContext(sg_bullet_img)
@@ -121,11 +121,11 @@ end
 
 class("MachingGun").extends(Weapon)
 
-local mg_size <const> = 3
+local mg_size <const> = 4
 local mg_bullet_img <const> = gfx.image.new(mg_size, mg_size)
 local mg_speed <const> = 350 * deltaTime
 local mg_damage <const> = 1
-local mg_spread <const> = math.rad(6)
+local mg_spread <const> = math.rad(5)
 local mg_rate <const> = 100
 local mg_knockback <const> = -100
 
@@ -146,7 +146,7 @@ function MachingGun:fire(facing)
   if pd.buttonIsPressed("b") and time - self.last >= mg_rate then
     self.last = time
     local dx, dy = math.from_polar(theata+(math.random()*2-1)*(sg_spread))
-    Bullet(sg_bullet_img, sg_damage, actor.x + bullet_offset*facing, actor.y, dx*sg_speed, dy*sg_speed)
+    Bullet(mg_bullet_img, sg_damage, actor.x + bullet_offset*facing, actor.y, dx*sg_speed, dy*sg_speed)
     Signal:dispatch("player_knockback", facing*mg_knockback)
   end
 end

@@ -1,6 +1,6 @@
 local gfx <const> = playdate.graphics
-local speed <const> = 45 * deltaTime
-local angrySpeed <const> = 1.5
+local angrySpeed <const> = 1.8
+local angryHealth <const> = 5
 
 local function throwBody(x, y, image)
   if not parti then return end
@@ -22,6 +22,8 @@ end
 
 
 class("Enemy").extends(Trigger)
+
+local speed <const> = 45 * deltaTime
 
 function Enemy:init(images, x, y)
   Enemy.super.init(self)
@@ -92,6 +94,7 @@ end
 function Enemy:getAngry(x, y)
   self.speed *= angrySpeed
   self:moveTo(x, y)
+  self.health += angryHealth
   if not self.timer then
     self.timer = playdate.timer.performAfterDelay(100, function() smoke(self.x, self.y) end)
     self.timer.discardOnCompletion = false
