@@ -1,0 +1,6 @@
+name=super date box
+author=Robert Curry
+description=a super crate box demake
+bundleID=au.com.curry.robert
+version=0.0.1
+buildNumber=212

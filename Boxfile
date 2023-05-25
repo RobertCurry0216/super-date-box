@@ -1,0 +1,13 @@
+{
+    "toyboxes": {
+        "github.com/NicMagnier/PlaydateLDtkImporter": "main",
+        "github.com/RobertCurry0216/pp-lib": "1",
+        "github.com/RobertCurry0216/roomy-playdate": "1",
+        "github.com/DidierMalenfant/Signal": "1",
+        "github.com/RobertCurry0216/parti": "main",
+        "github.com/RobertCurry0216/more_math": "main"
+    },
+    "installed": {
+        "github.com/RobertCurry0216/roomy-playdate": "1.0.0"
+    }
+}
