@@ -8,6 +8,10 @@
         "github.com/RobertCurry0216/more_math": "main"
     },
     "installed": {
-        "github.com/RobertCurry0216/roomy-playdate": "1.0.0"
+        "github.com/NicMagnier/PlaydateLDtkImporter": "main@a11dbbfd28acebd2d6903a808ff6475bea11c3c9",
+        "github.com/RobertCurry0216/pp-lib": "1.0.2",
+        "github.com/DidierMalenfant/Signal": "1.1.0",
+        "github.com/RobertCurry0216/parti": "main@19579a27e6980e157852c0a1ace13adb6918cb5d",
+        "github.com/RobertCurry0216/more_math": "main@667f8a0ba7df1c49740b11c5738d9e382d5fb31f"
     }
 }
