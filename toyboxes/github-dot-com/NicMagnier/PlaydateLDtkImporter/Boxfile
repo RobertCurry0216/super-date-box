@@ -1,5 +1,0 @@
-{
-    "config": {
-        "lua_import": "LDtk.lua"
-    }
-}

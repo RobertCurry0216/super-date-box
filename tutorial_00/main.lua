@@ -10,4 +10,5 @@ end
 init()
 
 function playdate.update()
+
 end

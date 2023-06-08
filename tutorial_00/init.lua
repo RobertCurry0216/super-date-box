@@ -7,7 +7,6 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 
-
 -- fonts
 small_font = gfx.font.new("fonts/BitPotion")
 
