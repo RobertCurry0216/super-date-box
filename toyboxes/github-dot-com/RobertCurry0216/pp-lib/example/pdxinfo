@@ -1,6 +1,6 @@
-name=super date box
+name=platformer
 author=Robert Curry
 description=This is practice project
 bundleID=au.com.curry.robert
-version=1.0.0
-buildNumber=383
+version=0.0.1
+buildNumber=1
