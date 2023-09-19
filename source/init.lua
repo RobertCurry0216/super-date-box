@@ -8,7 +8,13 @@ import "CoreLibs/sprites"
 import "CoreLibs/timer"
 
 -- toybox
-import "../toyboxes/toyboxes.lua"
+-- relative imports are being weird so this is a work around
+import './../toyboxes/github-dot-com/NicMagnier/PlaydateLDtkImporter/LDtk.lua'
+import './../toyboxes/github-dot-com/RobertCurry0216/pp-lib/pp-lib.lua'
+import './../toyboxes/github-dot-com/RobertCurry0216/roomy-playdate/roomy-playdate.lua'
+import './../toyboxes/github-dot-com/DidierMalenfant/Signal/Signal.lua'
+import './../toyboxes/github-dot-com/RobertCurry0216/parti/parti.lua'
+import './../toyboxes/github-dot-com/RobertCurry0216/more_math/more_math.lua'
 
 -- utilities
 import "lib/enum"

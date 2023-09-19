@@ -31,7 +31,7 @@ import 'LDtk'
 
 Next you need to load your main .ldtk file, typically during the game loading
 ```lua
-Ldtk.load( "MyWorld.ldtk" )
+LDtk.load( "MyWorld.ldtk" )
 ```
 
 If your LDtk world is saved in multiple files (in this case you see a .ldtkl file for each level in your structure) you need to manually load the levels.
@@ -73,3 +73,19 @@ for index, entity in ipairs( LDtk.get_entities( "TheFirstLevel" ) ) do
 	end
 end
 ```
+
+### Changelog
+
+#### version 1.04
+- Fix issue with fast loading that was not using the correct path
+- Add error message when the level lua file is not found when using fast loading
+
+#### version 1.03
+- Fix crash when the LDtk internal icons are used in a level
+
+#### version 1.02
+- Make it possible to have the ldtk file at the root of the project
+
+#### version 1.01
+- Make it possible to use tileset that are in any folder of the project, not just under the ldtk file
+- Added function to generate image from a tileset rect

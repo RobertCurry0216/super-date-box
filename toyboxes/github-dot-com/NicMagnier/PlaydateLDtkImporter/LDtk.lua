@@ -1,3 +1,5 @@
+-- version 1.04
+--
 -- Read levels made with LDtk level editor
 -- More information about LDtk: https://ldtk.io/
 --
@@ -39,7 +41,11 @@ LDtk = {}
 
 local _ldtk_filepath = nil
 local _ldtk_folder = nil
+local _ldtk_filename = nil
+local _ldtk_folder_table = nil
 local _ldtk_lua_folder = nil
+
+local _ldtk_lua_foldername = "LDtk_lua_levels"
 
 local _level_files = {}
 local _levels = {}
@@ -59,20 +65,24 @@ local _ = {} -- for private functions
 --	nil: will load lua files if they exist
 function LDtk.load( ldtk_file, use_lua_levels )
 	_ldtk_filepath = ldtk_file
-	_ldtk_folder = _.get_folder( ldtk_file )
-	_ldtk_lua_folder = _ldtk_folder.."LDtk_lua_levels/"
+	_ldtk_folder, _ldtk_filename = _.get_folder_and_filename( ldtk_file )
+	_ldtk_folder_table = _.get_folder_table( _ldtk_folder )
+	_ldtk_lua_folder = _ldtk_folder.._ldtk_lua_foldername
 
-	local lua_filename = _ldtk_lua_folder.._.get_filename( ldtk_file )..".pdz"
+	local lua_filename = _ldtk_lua_folder.."/".._ldtk_filename..".pdz"
 
 	-- check if we should load the lua files instead of the json files
 	_use_lua_levels = use_lua_levels
-	if _use_lua_levels==nil then
-		_use_lua_levels = playdate.file.exists( lua_filename )
+	if _use_lua_levels then
+		if not playdate.file.exists( lua_filename ) then
+			_use_lua_levels = false
+			print("LDtk Importer cannot load lua file (compiled as .pdz) because it does not exist.", lua_filename)
+		end
 	end
 
 	-- simply load the level from the precomputed lua file
 	if _use_lua_levels then
-		print("LDtk loader will use lua precomputed levels.")
+		print("LDtk Importer will use lua precomputed levels.")
 		local data = playdate.file.run( lua_filename )
 
 		_tilesets = data.tilesets
@@ -85,7 +95,7 @@ function LDtk.load( ldtk_file, use_lua_levels )
 		if not _use_external_files then
 			for level_name in pairs(_levels) do
 				_.load_tileset( level_name )
-			end	
+			end
 		end
 		return
 	end
@@ -96,17 +106,11 @@ function LDtk.load( ldtk_file, use_lua_levels )
 
 	-- handle the tilesets
 	for tileset_index, tileset_data in ipairs(data.defs.tilesets) do
-		-- check if the image table is in the folder of the ldtk file
-		if string.byte(".", 1)==string.byte(tileset_data.relPath, 1) then
-			error( "Cannot load tileset used by LDtk levels. imageTable tilesets must be in the same folder as ldtk file.", 2)
-			return
-		end
-
 		local tileset = {}
 
 		_tilesets[ tileset_data.uid ] = tileset
 
-		tileset.imageTable_filename = tileset_data.relPath
+		tileset.imageTable_filename = _.convert_relative_folder( tileset_data.relPath )
 		tileset.imageWidth = tileset_data.pxWid
 		tileset.imageHeight = tileset_data.pxHei
 
@@ -149,7 +153,7 @@ function LDtk.load( ldtk_file, use_lua_levels )
 				registered_tileIDs_flipped[ tileID_flip_y ] = true
 				registered_tileIDs_flipped[ tileID_flip_xy ] = true
 			end
-			
+
 			-- empty versions
 			local tileIDs_empty = {}
 			for tileID = 1, cw*ch do
@@ -183,12 +187,12 @@ function LDtk.load( ldtk_file, use_lua_levels )
 	-- we load the levels
 	for level_index, level_data in ipairs(data.levels) do
 		if level_data.externalRelPath then
-			_level_files[ level_data.identifier ] = level_data.externalRelPath
+			_level_files[ level_data.identifier ] = _.convert_relative_folder( level_data.externalRelPath )
 		else
 			LDtk.load_level( level_data )
 			_.load_tileset( level_data.identifier )
 		end
-	end	
+	end
 end
 
 -- Call this function to save the LDtk level in lua files to improve loading performance
@@ -199,8 +203,8 @@ function LDtk.export_to_lua_files()
 		return
 	end
 
-	local folder = "LDtk_lua_levels/"
-	playdate.file.mkdir(folder)
+	local folder = _ldtk_lua_foldername.."/"
+	playdate.file.mkdir(_ldtk_lua_foldername)
 
 	local lua_level_files = {}
 	for level_name, level_file in pairs(_level_files) do
@@ -209,7 +213,7 @@ function LDtk.export_to_lua_files()
 	end
 
 	print("Export LDtk world")
-	_.export_lua_table( folder.._.get_filename(_ldtk_filepath)..".lua", {
+	_.export_lua_table( folder.._ldtk_filename..".lua", {
 		tilesets = _tilesets,
 		level_files = lua_level_files,
 		level_names = _level_names,
@@ -242,7 +246,7 @@ function LDtk.load_level( level_name )
 
 	local level_data
 	if type(level_name)=="string" then
-		level_data = json.decodeFile( _ldtk_folder.._level_files[ level_name ] )
+		level_data = json.decodeFile( _level_files[ level_name ] )
 	else
 		level_data = level_name
 	end
@@ -257,6 +261,12 @@ function LDtk.load_level( level_name )
 		if direction then
 			table.insert( level.neighbours[ direction ], _level_names[ neighbour_data.levelIid ])
 		end
+	end
+
+	-- load level's custom fields
+	for index, field_data in ipairs(level_data.fieldInstances) do
+		level.custom_data = {}
+		level.custom_data[ field_data.__identifier ] = field_data.__value
 	end
 
 	-- handle layers
@@ -280,7 +290,7 @@ function LDtk.load_level( level_name )
 
 		-- load tileset
 		if layer_data.__tilesetRelPath then
-			layer.tileset_file = layer_data.__tilesetRelPath
+			layer.tileset_file = _.convert_relative_folder( layer_data.__tilesetRelPath )
 		end
 		layer.has_flipped_tiles = false
 
@@ -298,7 +308,7 @@ function LDtk.load_level( level_name )
 			local gsize = layer.grid_size
 			local tileset_data = _tilesets[ layer.tileset_uid ]
 			local cw, ch = tileset_data.imageWidth/gsize, tileset_data.imageHeight/gsize
-			
+
 			-- check we we have any flipped tiles
 			for tile_index, tile_data in ipairs(tiles_data) do
 				if tile_data.f~=0 then
@@ -356,6 +366,8 @@ function LDtk.load_level( level_name )
 
 				table.insert( layer.entities, {
 					name = entity_data.__identifier,
+					iid = entity_data.iid,
+					tileset_rect = entity_data.__tile,
 					position = { x=entity_data.px[1], y=entity_data.px[2] },
 					center = { x=entity_data.__pivot[1], y=entity_data.__pivot[2] },
 					size = { width=entity_data.width, height=entity_data.height },
@@ -415,11 +427,11 @@ function LDtk.get_entities( level_name, layer_name )
 	local layer = level.layers[ layer_name ]
 	if not layer then return end
 
-	return layer.entities
+	return layer.entities or {}
 end
 
 -- return a tilemap for the level
--- @layer_name is optional, if nil than will return the first layer with tiles
+-- @layer_name is optional, if nil then will return the first layer with tiles
 function LDtk.create_tilemap( level_name, layer_name )
 	local layer = _.get_tile_layer( level_name, layer_name )
 	if not layer then return end
@@ -447,7 +459,27 @@ end
 -- return the position and site of the level in the world
 -- always available, the level doesn't need to be loaded
 function LDtk.get_rect( level_name )
-	return _level_rects[level_name]
+	return _level_rects[ level_name ]
+end
+
+-- return custom data for the specified level
+-- @field_name is optional, if nil then it will return all the fields as a table
+function LDtk.get_custom_data( level_name, field_name )
+	local level = _levels[ level_name ]
+	if not level then
+		return nil
+	end
+
+	local custom_data = level.custom_data
+	if not custom_data then
+		return nil
+	end
+
+	if field_name then
+		return custom_data[ field_name ]
+	end
+
+	return custom_data
 end
 
 -- return all the tileIDs tagged in LDtk with tileset_enum_value
@@ -491,17 +523,149 @@ function LDtk.get_layers(level_name)
 	return level.layers
 end
 
+
+-- Generate an image from a section of a tileset
+-- https://ldtk.io/json/#ldtk-TilesetRect
+-- You can use it as custom property
+function LDtk.generate_image_from_tileset_rect( tileset_rect )
+	if not tileset_rect then
+		return nil
+	end
+
+	-- Load tileset
+	local tileset = _tilesets[ tileset_rect.tilesetUid ]
+	if not tileset then
+		return nil
+	end
+	local cells = _.load_tileset_imagetable( tileset.imageTable_filename )
+	if not cells then
+		return nil
+	end
+
+	local cell_width, cell_height = cells[1]:getSize()
+	local x_count = math.ceil( tileset_rect.w/cell_width )
+	local y_count = math.ceil( tileset_rect.h/cell_height )
+
+	local entity_image = playdate.graphics.image.new(tileset_rect.w, tileset_rect.h)
+
+	playdate.graphics.lockFocus( entity_image )
+		for y = 0, y_count-1 do
+			for x = 0, x_count-1 do
+				cells:getImage( 1 + (tileset_rect.x//cell_width) + x, 1 + (tileset_rect.y//cell_height) + y ):draw( x*cell_width, y*cell_height )
+			end
+		end
+	playdate.graphics.unlockFocus()
+
+	_.release_tileset_imagetable( tileset.imageTable_filename )
+
+	return entity_image
+end
+
+-- Generate an image of an entity
+-- The entity needs to have the 'Editor Visual' property set to a tileset in LDtk
+function LDtk.generate_image_from_entity( entity )
+	if not entity then
+		return nil
+	end
+
+	if not entity.tileset_rect then
+		print("LDtk: Cannot generate entity image. No tileset assigned to it.")
+		return
+	end
+
+	return LDtk.generate_image_from_tileset_rect( entity.tileset_rect )
+end
+
 --
 -- internal functions
 --
 
+function _.get_folder_and_filename( filepath )
+	local folder, filename, extension = filepath:match("(.-)([^/.]-).([^.]+)$")
+	return folder, filename
+end
+
 function _.get_filename( filepath )
-	return filepath:match("^.+/(.+)$")
+	local folder, filename = _.get_folder_and_filename( filepath )
+	return filename
 end
 
 function _.get_folder( filepath )
-	local filename = filepath:match("^.+/(.+)$")
-	return filepath:sub(0, -#filename-1)
+	local folder, filename = _.get_folder_and_filename( filepath )
+	return folder
+end
+
+
+function _.get_folder_table( path )
+	local delimiter = '/'
+	local result = {}
+	local string_index = 1
+	local folder
+
+	if not path then
+		return result
+	end
+
+	local found_start, found_end = string.find( path, delimiter, string_index)
+	while found_start do
+		folder = string.sub( path, string_index , found_start-1 )
+		if type(folder)=="string" and string.len(folder)>0 then
+			table.insert(result, folder)
+		end
+
+		string_index = found_end + 1
+		found_start, found_end = string.find( path, delimiter, string_index)
+	end
+
+	folder = string.sub( path, string_index)
+	if type(folder)=="string" and string.len(folder)>0 then
+		table.insert(result, folder)
+	end
+
+	return result
+end
+
+function _.convert_relative_folder( filepath )
+	if not filepath then
+		return nil
+	end
+
+	local ldtk_folder_end = #_ldtk_folder_table
+	local relative_path_start = 1
+
+	local relative_path_table = _.get_folder_table( filepath )
+	for index, relative_folder in ipairs(relative_path_table) do
+		if relative_folder==".." then
+			ldtk_folder_end = ldtk_folder_end - 1
+		elseif relative_folder~="." then
+			goto skip_folders
+		end
+
+		relative_path_start = relative_path_start + 1
+	end
+	::skip_folders::
+
+	if ldtk_folder_end<0 then
+		error( "LDtk cannot access the following path because it is outside the project folder: "..filepath)
+	end
+
+	local absolute_path
+	for index = 1, ldtk_folder_end do
+		if absolute_path then
+			absolute_path = absolute_path.."/".._ldtk_folder_table[ index ]
+		else
+			absolute_path = _ldtk_folder_table[ index ]
+		end
+	end
+	for index = relative_path_start, #relative_path_table do
+		if absolute_path then
+			absolute_path = absolute_path.."/"..relative_path_table[ index ]
+		else
+			absolute_path = relative_path_table[ index ]
+		end
+	end
+
+	return absolute_path
 end
 
 function _.load_tileset( level_name )
@@ -516,6 +680,10 @@ function _.load_tileset( level_name )
 end
 
 function _.load_tileset_imagetable(path, flipped)
+	if not path then
+		return
+	end
+
 	local id = path
 	if flipped then
 		id = id.."[flipped]"
@@ -530,9 +698,9 @@ function _.load_tileset_imagetable(path, flipped)
 	if flipped then
 		local filename = path:match("^.+/(.+)$")
 		local tileset_folder = path:sub(0, -#filename-1)
-		image_filepath = _ldtk_folder..tileset_folder.."flipped-"..filename
+		image_filepath = tileset_folder.."flipped-"..filename
 	else
-		image_filepath = _ldtk_folder..path
+		image_filepath = path
 	end
 
 	local image = playdate.graphics.imagetable.new(image_filepath)
@@ -623,7 +791,11 @@ function _.export_lua_table( filepath, table_to_export )
 				end
 			else
 				for key, value in pairs(entry) do
-					file:write("[\""..tostring(key).."\"]=")
+					if type(key) == "number" then
+						file:write("["..tostring(key).."]=")
+					else
+						file:write("[\""..tostring(key).."\"]=")
+					end
 					_write_entry(value, key)
 					file:write(",")
 				end
